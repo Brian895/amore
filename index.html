@@ -1,0 +1,588 @@
+<!DOCTYPE html>     
+<html lang="es">     
+<head>     
+<meta charset="UTF-8">     
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">     
+<title>Flores para ti ♡</title>     
+<style>     
+:root{ --card:#F6EEDF; --ink:#3f2a22; --ink2:#7a5e52; }     
+*{margin:0;padding:0;box-sizing:border-box}     
+html,body{height:100%}     
+body{background:#140010; display:flex;align-items:center;justify-content:center; overflow:hidden; font-family: ui-serif, Georgia, serif}     
+.bg{position:fixed; inset:0; background:radial-gradient(ellipse at 50% 12%, #ff5e92 0%, #e93b7a 28%, #9a1048 66%, #1a0010 100%); z-index:0}     
+.hearts{position:absolute; inset:0; overflow:hidden; pointer-events:none}     
+.hearts i{position:absolute; color:rgba(255,255,255,.12); animation:drift linear infinite; font-style:normal}     
+@keyframes drift{ from{transform:translateY(110vh) translateX(0) scale(.8); opacity:0} to{transform:translateY(-15vh) translateX(40px) scale(1.2); opacity:0}}     
+     
+.card{position:relative; z-index:5; width:min(92vw, 880px); aspect-ratio:1.62/1; background:var(--card); border-radius:32px; box-shadow:0 30px 80px rgba(0,0,0,.45); overflow:hidden; display:grid; grid-template-columns:0.96fr 1.18fr; padding:28px 32px 18px 32px}     
+     
+.text-zone{position:relative; display:flex; flex-direction:column; justify-content:center; gap:18px; padding-right:10px; z-index:4; padding-bottom:62px}     
+     
+.t-line{font-size:clamp(16.5px,2.8vw,20px); font-weight:500; line-height:1.42; color:var(--ink); opacity:0; transform:translateY(6px); transition:opacity .6s, transform .6s; white-space:pre-line; min-height:1.1em}     
+.t-line.visible{opacity:1; transform:none}     
+.cursor::after{content:"_"; animation:blink 1s steps(2) infinite; margin-left:2px}     
+@keyframes blink{0%{opacity:0}50%{opacity:1}}     
+     
+.tree-zone{position:relative; display:flex; align-items:flex-end; justify-content:center; overflow:visible}     
+     
+.tree-wrap{position:relative; width:100%; height:100%; max-width:580px}     
+     
+#tree-trunk{position:absolute; left:0; right:0; bottom:0; top:0; width:100%; height:100%; z-index:2; opacity:0; transition:opacity .8s}     
+#tree-trunk.show{opacity:1}     
+.tree-path{fill:#6e3a1f; stroke:none; stroke-linecap:round; stroke-linejoin:round}     
+     
+.flowers{position:absolute; inset:0 0 24px 0; z-index:3; pointer-events:none}     
+.flowers.back{ z-index:2; opacity:0.92 }     
+.flowers.front{ z-index:4 }     
+.sun{position:absolute; width:var(--sz); height:var(--sz); transform:translate(-50%,-50%) scale(0); transition:transform .6s cubic-bezier(.34,1.56,.64,1); will-change:transform}     
+.sun.show{transform:translate(-50%,-50%) scale(1) rotate(var(--rot))}     
+.sun .petal-layer{position:absolute; inset:0; border-radius:50%}     
+.sun .petal-layer::before{content:""; position:absolute; inset:-22%; background:conic-gradient(from 0deg, #ffe03a 0 13deg, #ffb700 13deg 26deg, #ffe03a 26deg 39deg, #ffb700 39deg 52deg, #ffe03a 52deg 65deg, #ffb700 65deg 78deg, #ffe03a 78deg 91deg, #ffb700 91deg 104deg, #ffe03a 104deg 117deg, #ffb700 117deg 130deg, #ffe03a 130deg 143deg, #ffb700 143deg 156deg, #ffe03a 156deg 169deg, #ffb700 169deg 182deg, #ffe03a 182deg 195deg, #ffb700 195deg 208deg, #ffe03a 208deg 221deg, #ffb700 221deg 234deg, #ffe03a 234deg 247deg, #ffb700 247deg 260deg, #ffe03a 260deg 273deg, #ffb700 273deg 286deg, #ffe03a 286deg 299deg, #ffb700 299deg 312deg, #ffe03a 312deg 325deg, #ffb700 325deg 338deg, #ffe03a 338deg 360deg); border-radius:50%; z-index:-1; clip-path:polygon(50% 0%, 60% 17%, 79% 9%, 71% 28%, 93% 36%, 74% 50%, 91% 67%, 70% 72%, 77% 92%, 56% 81%, 50% 100%, 44% 81%, 23% 92%, 30% 72%, 9% 67%, 26% 50%, 7% 36%, 29% 28%, 21% 9%, 40% 17%); filter:drop-shadow(0 1px 0 rgba(0,0,0,.18))}     
+.sun .center{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:46%; height:46%; background:radial-gradient(circle at 35% 32%, #5a351d 0%, #3d2312 24%, #241308 52%, #110a04 100%); border-radius:50%; box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}     
+.sun.light .petal-layer::before{filter:brightness(1.22) saturate(1.08) hue-rotate(-2deg)}     
+.sun.dark .center{background:radial-gradient(circle at 35% 32%, #6b3d1e 0%, #4a2914 35%, #1e1006 70%)}     
+.sun.small{opacity:.96}     
+.sun.leaving{z-index:30 !important; transition:none}     
+     
+.counter{position:absolute; left:32px; right:32px; bottom:48px; display:flex; flex-direction:column; gap:4px; opacity:0; transform:translateY(8px); transition:all .6s; z-index:7; padding-top:0}     
+.counter.show{opacity:1; transform:none}     
+.counter-label{font-family:ui-serif, Georgia; font-size:14px; color:var(--ink2); margin-bottom:6px}     
+.counter-values{font-size:17px; font-weight:800; color:var(--ink); line-height:1.4; letter-spacing:-.01em}     
+.counter-values b{font-size:20px; font-weight:900}     
+.ground-line{position:absolute; left:32px; right:32px; bottom:18px; height:2px; background:#1e1a18; z-index:6; opacity:0; transition:opacity .6s}     
+     
+.intro{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10; background:var(--card); transition:opacity .7s; cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:manipulation}     
+.intro.hide{opacity:0; pointer-events:none}     
+.intro-heart{width:56px; height:56px; position:relative; animation:pulse 1.4s ease-in-out infinite; display:flex; align-items:center; justify-content:center; font-size:46px; line-height:1; filter: drop-shadow(0 2px 6px rgba(0,0,0,.15))}     
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}     
+.intro-text{margin-top:14px; font-size:14px; color:#3f2a22; display:flex; gap:10px; align-items:center; letter-spacing:.02em}     
+.intro-hint{margin-top:10px; font-size:12px; color:#7a5e52; opacity:.85; animation:blink 1.6s infinite}     
+     
+@keyframes fallDiagonal{     
+ 0%{transform:translate(-50%,-50%) rotate(var(--rot)) scale(1); opacity:1}     
+ 20%{transform:translate(calc(-50% + var(--sx1)), calc(-50% + var(--sy1))) rotate(calc(var(--rot) + var(--r1))) scale(1)}     
+ 50%{transform:translate(calc(-50% + var(--sx2)), calc(-50% + var(--sy2))) rotate(calc(var(--rot) + var(--r2))) scale(.94)}     
+ 100%{transform:translate(calc(-50% + var(--sx3)), calc(-50% + var(--sy3))) rotate(calc(var(--rot) + var(--r3))) scale(.70); opacity:0}     
+}     
+   
+/* ===== AJUSTE HORIZONTAL PARA CELULAR ===== */   
+@media(max-width:700px){     
+  html,body{   
+    width:100%;   
+    height:100%;   
+    min-height:100%;   
+    overflow:hidden;   
+  }   
+   
+  body{   
+    display:flex;   
+    align-items:center;   
+    justify-content:center;   
+    padding:0;   
+  }   
+   
+  .card{   
+    width:96vw;   
+    max-width:none;   
+    height:auto;   
+    aspect-ratio:1.62/1;   
+    min-height:0;   
+    border-radius:20px;   
+    padding:14px 16px 12px 16px;   
+    display:grid;   
+    grid-template-columns:0.96fr 1.18fr;   
+    grid-template-rows:1fr;   
+    overflow:hidden;   
+  }   
+   
+  .text-zone{   
+    grid-column:1;   
+    grid-row:1;   
+    order:initial;   
+    width:100%;   
+    height:100%;   
+    min-width:0;   
+    padding:0 8px 58px 4px;   
+    gap:9px;   
+    align-items:flex-start;   
+    text-align:left;   
+    justify-content:flex-start;   
+    overflow:hidden;   
+  }   
+   
+  .tree-zone{   
+    grid-column:2;   
+    grid-row:1;   
+    order:initial;   
+    width:100%;   
+    height:100%;   
+    min-height:0;   
+    min-width:0;   
+    display:flex;   
+    align-items:flex-end;   
+    justify-content:center;   
+    margin:0;   
+    padding:0;   
+    overflow:visible;   
+  }   
+   
+  .tree-wrap{   
+    width:100%;   
+    height:100%;   
+    max-width:none;   
+    aspect-ratio:auto;   
+    margin:0;   
+    flex:none;   
+  }   
+   
+  #tree-trunk{   
+    width:100%;   
+    height:100%;   
+    object-fit:contain;   
+    object-position:bottom center;   
+  }   
+   
+  .flowers{   
+    inset:0 0 4px 0;   
+  }   
+   
+  .t-line{   
+    font-size:clamp(10px,2.4vw,13px);   
+    line-height:1.32;   
+    text-align:left;   
+    width:100%;   
+    flex:none;   
+    min-height:2.64em;   
+  }   
+   
+  #l4{   
+    min-height:1.32em;   
+    margin-top:3px !important;   
+  }   
+   
+  .counter{   
+    position:absolute;   
+    left:16px;   
+    right:16px;   
+    bottom:30px;   
+    width:auto;   
+    margin:0;   
+    padding:0;   
+    align-items:flex-start;   
+    text-align:left;   
+    transform:translateY(8px);   
+  }   
+   
+  .counter.show{   
+    transform:none;   
+  }   
+   
+  .counter-label{   
+    text-align:left;   
+    font-size:10px;   
+    margin-bottom:3px;   
+  }   
+   
+  .counter-values{   
+    font-size:11px;   
+    text-align:left;   
+    line-height:1.25;   
+  }   
+   
+  .counter-values b{   
+    font-size:13px;   
+  }   
+   
+  .ground-line{   
+    position:absolute;   
+    left:16px;   
+    right:16px;   
+    bottom:10px;   
+    width:auto;   
+    margin:0;   
+  }   
+   
+  .intro-heart{   
+    width:42px;   
+    height:42px;   
+    font-size:34px;   
+  }   
+   
+  .intro-text{   
+    margin-top:9px;   
+    font-size:12px;   
+    gap:7px;   
+  }   
+   
+  .intro-hint{   
+    margin-top:7px;   
+    font-size:10px;   
+  }   
+}   
+   
+/* ===== CELULARES MUY PEQUEÑOS / HORIZONTAL ===== */   
+@media(max-width:500px) and (orientation:landscape){   
+  .card{   
+    width:94vw;   
+    aspect-ratio:1.62/1;   
+    padding:10px 12px 8px 12px;   
+    border-radius:18px;   
+  }   
+   
+  .text-zone{   
+    padding:0 6px 45px 3px;   
+    gap:7px;   
+  }   
+   
+  .t-line{   
+    font-size:clamp(9.5px,2.5vw,12px);   
+    line-height:1.27;   
+    min-height:2.54em;   
+  }   
+   
+  #l4{   
+    min-height:1.27em;   
+  }   
+   
+  .counter{   
+    left:12px;   
+    right:12px;   
+    bottom:22px;   
+  }   
+   
+  .counter-label{   
+    font-size:9px;   
+  }   
+   
+  .counter-values{   
+    font-size:10px;   
+  }   
+   
+  .counter-values b{   
+    font-size:12px;   
+  }   
+   
+  .ground-line{   
+    left:12px;   
+    right:12px;   
+    bottom:7px;   
+  }   
+   
+  .intro-heart{   
+    width:36px;   
+    height:36px;   
+    font-size:30px;   
+  }   
+   
+  .intro-text{   
+    font-size:10px;   
+    margin-top:5px;   
+  }   
+   
+  .intro-hint{   
+    font-size:9px;   
+    margin-top:4px;   
+  }   
+}   
+   
+@media(max-width:400px){     
+  .card{     
+    width:95vw;   
+    padding:9px 10px 8px 10px;   
+    border-radius:17px;   
+  }   
+   
+  .text-zone{   
+    padding:0 5px 42px 2px;   
+    gap:6px;   
+  }   
+   
+  .t-line{   
+    font-size:clamp(9px,2.5vw,11.5px);   
+    line-height:1.25;   
+    min-height:2.5em;   
+  }   
+   
+  #l4{   
+    min-height:1.25em;   
+  }   
+   
+  .counter{   
+    left:10px;   
+    right:10px;   
+    bottom:20px;   
+  }   
+   
+  .counter-label{   
+    font-size:8px;   
+  }   
+   
+  .counter-values{   
+    font-size:9px;   
+  }   
+   
+  .counter-values b{   
+    font-size:11px;   
+  }   
+   
+  .ground-line{   
+    left:10px;   
+    right:10px;   
+    bottom:6px;   
+  }   
+}     
+     
+</style>     
+</head>     
+<body>     
+<div class="bg"></div>     
+<div class="hearts" id="hearts"></div>     
+<div class="card" id="card">     
+  <div class="intro" id="intro">     
+    <div class="intro-heart">💛</div>     
+    <div class="intro-text"><span style="width:26px; height:1px; background:#3f2a22; opacity:.5"></span>Flores Para Ti</div>     
+    <div class="intro-hint">click para entrar ♡</div>     
+  </div>     
+     
+  <div class="text-zone" id="textZone">     
+    <div class="t-line" id="l1"></div>     
+    <div class="t-line" id="l2"></div>     
+    <div class="t-line" id="l3"></div>     
+    <div class="t-line" id="l4" style="margin-top:6px"></div>     
+  </div>     
+   
+  <div class="counter" id="counter">   
+    <div class="counter-label">Mi amor por ti comenzó hace...</div>   
+    <div class="counter-values"><b id="d">0</b> días <b id="h">00</b> horas <b id="m">00</b> minutos <b id="s">00</b> segundos</div>   
+  </div>     
+   
+  <div class="ground-line" id="groundLine"></div>     
+     
+  <div class="tree-zone"><div class="tree-wrap" id="treeWrap">     
+    <svg id="tree-trunk" viewBox="0 0 300 300" preserveAspectRatio="none">     
+      <defs>     
+        <linearGradient id="barkShade" x1="0" x2="1">     
+          <stop offset="0%" stop-color="#4a2815"/><stop offset="35%" stop-color="#7d4328"/><stop offset="100%" stop-color="#8a5438"/>     
+        </linearGradient>     
+      </defs>     
+      <path d="M 137 266 L 141.5 210 Q 143 175 146 135 L 154 135 Q 153 175 152 210 L 163 266 Z" fill="url(#barkShade)" />    
+      <path d="M 143 180 Q 115 165 72 142 Q 58 135 36 128 Q 38 126 58 131 Q 78 140 112 156 Q 135 169 145 175 Z" fill="#6e3a1f"/>    
+      <path d="M 62 140 Q 52 138 40 137 Q 42 135 52 136 Q 64 138 68 139 Z" fill="#6e3a1f" opacity="0.85"/>    
+      <path d="M 150 185 Q 168 173 188 158 Q 204 147 220 138 Q 222 142 204 152 Q 186 164 166 176 Q 150 186 148 189 Z" fill="#6e3a1f"/>    
+      <path d="M 192 158 Q 202 155 212 153 Q 212 156 202 158 Q 192 160 188 161 Z" fill="#6e3a1f" opacity="0.75"/>    
+      <path d="M 147 148 Q 118 126 78 96 Q 58 82 32 70 Q 34 67 58 76 Q 86 92 114 112 Q 136 131 150 142 Z" fill="#6e3a1f"/>    
+      <path d="M 76 98 Q 62 94 46 93 Q 48 91 62 92 Q 78 95 82 97 Z" fill="#6e3a1f" opacity="0.8"/>    
+      <path d="M 148 135 Q 149.5 105 151 75 Q 152 58 153 44 Q 157 44 154 58 Q 152 75 151 105 Q 150 125 153 135 Z" fill="#6e3a1f"/>    
+      <path d="M 154 132 Q 172 114 192 90 Q 206 74 222 52 Q 226 56 208 78 Q 190 98 172 116 Q 158 129 154 136 Z" fill="#6e3a1f"/>    
+      <path d="M 194 90 Q 202 84 210 78 Q 212 81 204 86 Q 196 90 192 92 Z" fill="#6e3a1f" opacity="0.8"/>    
+      <path d="M 154 148 Q 170 138 188 128 Q 202 121 214 116 Q 216 120 202 126 Q 186 134 170 142 Q 154 150 152 153 Z" fill="#6e3a1f"/>    
+    </svg>     
+    <div class="flowers back" id="flowersBack"></div>     
+    <div class="flowers" id="flowers"></div>     
+    <div class="flowers front" id="flowersFront"></div>     
+  </div></div>     
+</div>     
+     
+<script>     
+const START=new Date(2024,4,6,0,0,0);    
+const textLines=["Flores que nacieron para recordarte\nlo bonito que es tenerte en mi vida.","Entre tantos caminos que existen,\nvolvería a encontrarte una y otra vez.","Y si el tiempo pudiera detenerse,\nsolo pediría quedarme contigo.","— I Love You! ♡"];    
+const heartsEl=document.getElementById('hearts');    
+for(let i=0;i<16;i++){const h=document.createElement('i'); h.textContent=Math.random()>.5?'♡':'♥'; h.style.left=Math.random()*100+'%'; h.style.fontSize=(9+Math.random()*14)+'px'; h.style.animationDuration=(13+Math.random()*14)+'s'; h.style.animationDelay=(Math.random()*8)+'s'; heartsEl.appendChild(h);}    
+const intro=document.getElementById('intro'), trunkEl=document.getElementById('tree-trunk'), flowersEl=document.getElementById('flowers'), flowersBack=document.getElementById('flowersBack'), flowersFront=document.getElementById('flowersFront'), counter=document.getElementById('counter');    
+function rand(a,b){return a+Math.random()*(b-a)}    
+function heartXY(t,r){    
+  const s=Math.sin(t); const hx=16*Math.pow(s,3); const hy=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);    
+  const cx=0.505, cy=0.38;    
+  const scaleX=0.0285, scaleY=0.0242;    
+  let x=cx+ hx*scaleX*r; let y=cy - hy*scaleY*r;    
+  if(y>0.70) y=0.70+(y-0.70)*0.50;    
+  return {x,y};    
+}    
+let heartOutline=null;    
+function getHeartOutline(){    
+  if(heartOutline) return heartOutline;    
+  heartOutline=[];    
+  for(let i=0;i<360;i++){ const t=(i/360)*Math.PI*2; const {x,y}=heartXY(t,1.0); heartOutline.push([x,y]); }    
+  return heartOutline;    
+}    
+function isInsideHeart(px,py){    
+  const poly=getHeartOutline(); let inside=false;    
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){    
+    const xi=poly[i][0], yi=poly[i][1]; const xj=poly[j][0], yj=poly[j][1];    
+    const intersect=((yi>py)!==(yj>py)) && (px < (xj-xi)*(py-yi)/(yj-yi)+xi);    
+    if(intersect) inside=!inside;    
+  }    
+  return inside;    
+}    
+const suns=[]; const placed=[];    
+function canPlace(x,y, md){ for(let p of placed){ if(Math.hypot(x-p.x, y-p.y) < md) return false; } return true; }    
+const gridStep=0.032;    
+for(let gy=0.03; gy<0.80; gy+=gridStep){    
+  for(let gx=0.06; gx<0.94; gx+=gridStep*0.92){    
+    const jx=gx+rand(-0.010,0.010), jy=gy+rand(-0.010,0.010);    
+    if(!isInsideHeart(jx,jy)) continue;    
+    if(Math.random()<0.10) continue;    
+    if(!canPlace(jx,jy,0.016)) continue;    
+    const sz=rand(11.5,19.5);    
+    const layer = sz<13 ? flowersBack : sz>17 ? flowersFront : flowersEl;    
+    const variant = Math.random()<0.35 ? ' light' : Math.random()<0.2 ? ' dark' : '';    
+    const el=document.createElement('div'); el.className='sun'+variant+(sz<13?' small':'');    
+    el.style.setProperty('--sz', sz.toFixed(1)+'px'); el.style.setProperty('--rot', rand(-50,50)+'deg');    
+    el.style.left=(jx*100)+'%'; el.style.top=(jy*100)+'%'; el.dataset.x=jx; el.dataset.y=jy;    
+    el.innerHTML='<div class="petal-layer"></div><div class="center"></div>';    
+    layer.appendChild(el); suns.push(el); placed.push({x:jx,y:jy});    
+  }    
+}    
+for(let i=0;i<550;i++){    
+  const t=rand(0, Math.PI*2); const r=rand(0.76,1.02);    
+  const {x,y}=heartXY(t,r); const jx=x+rand(-0.012,0.012), jy=y+rand(-0.012,0.012);    
+  if(jy>0.84 || !isInsideHeart(jx,jy)) continue;    
+  if(!canPlace(jx,jy,0.017)) continue;    
+  const sz=rand(10.5,18.5);    
+  const layer = sz<12 ? flowersBack : sz>16.5 ? flowersFront : flowersEl;    
+  const variant = Math.random()<0.38 ? ' light' : Math.random()<0.22 ? ' dark' : '';    
+  const el=document.createElement('div'); el.className='sun'+variant+(sz<12?' small':'');    
+  el.style.setProperty('--sz', sz.toFixed(1)+'px'); el.style.setProperty('--rot', rand(-50,50)+'deg');    
+  el.style.left=(jx*100)+'%'; el.style.top=(jy*100)+'%'; el.dataset.x=jx; el.dataset.y=jy;    
+  el.innerHTML='<div class="petal-layer"></div><div class="center"></div>';    
+  layer.appendChild(el); suns.push(el); placed.push({x:jx,y:jy});    
+}    
+
+async function wait(ms){return new Promise(r=>setTimeout(r,ms))}    
+
+let started=false;    
+
+async function runSequence(){    
+  if(started) return;    
+  started=true;    
+
+  intro.classList.add('hide');    
+  await wait(350);    
+
+  trunkEl.classList.add('show');    
+  await wait(600);    
+
+  const all=[...flowersBack.children, ...flowersEl.children, ...flowersFront.children];    
+  const sorted=[...all].sort((a,b)=> parseFloat(a.dataset.y||0)-parseFloat(b.dataset.y||0));    
+
+  for(let i=0;i<sorted.length;i++){    
+    const s=sorted[i];    
+    setTimeout(()=>s.classList.add('show'), i*5);    
+  }    
+
+  /* LAS FLORES EMPIEZAN A CAER MIENTRAS EL CORAZÓN TODAVÍA ESTÁ APARECIENDO */    
+  setTimeout(()=>startFalling(),750);    
+
+  await wait(1300);    
+
+  counter.classList.add('show');    
+  document.getElementById('groundLine').style.opacity='1';    
+
+  await wait(400);    
+
+  for(let idx=0;idx<textLines.length;idx++){    
+    const el=document.getElementById('l'+(idx+1));    
+    const txt=textLines[idx];    
+
+    el.classList.add('visible','cursor');    
+
+    let out='';    
+
+    for(let c=0;c<txt.length;c++){    
+      out+=txt[c];    
+      el.textContent=out;    
+      await wait(txt[c]=='\n'?110:32);    
+    }    
+
+    el.classList.remove('cursor');    
+    await wait(320);    
+  }    
+}    
+
+function startFalling(){    
+  let queue=[...suns].sort(()=>Math.random()-0.5);    
+  let qIndex=0;    
+
+  function dropOne(){    
+    if(qIndex>=queue.length){    
+      qIndex=0;    
+      queue.sort(()=>Math.random()-0.5);    
+    }    
+
+    const s=queue[qIndex++ % queue.length];    
+
+    if(!s || !s.classList.contains('show') || s.classList.contains('leaving')){    
+      setTimeout(dropOne,120);    
+      return;    
+    }    
+
+    if(s.style.opacity==='0'){    
+      setTimeout(dropOne,120);    
+      return;    
+    }    
+
+    s.classList.add('leaving');    
+
+    s.style.setProperty('--sx1',rand(-28,-8)+'px');    
+    s.style.setProperty('--sy1',rand(16,30)+'px');    
+    s.style.setProperty('--sx2',rand(-72,-24)+'px');    
+    s.style.setProperty('--sy2',rand(80,130)+'px');    
+    s.style.setProperty('--sx3',rand(-128,-48)+'px');    
+    s.style.setProperty('--sy3',rand(175,255)+'px');    
+    s.style.setProperty('--r1',rand(18,55)+'deg');    
+    s.style.setProperty('--r2',rand(100,200)+'deg');    
+    s.style.setProperty('--r3',rand(320,520)+'deg');    
+
+    const dur=rand(3.2,4.8);    
+
+    s.style.animation=`fallDiagonal ${dur}s cubic-bezier(.25,.46,.45,.94) forwards`;    
+
+    s.addEventListener('animationend',()=>{    
+      s.style.opacity='0';    
+      s.style.animation='none';    
+      s.classList.remove('leaving','show');    
+
+      setTimeout(()=>{    
+        s.style.opacity='';    
+        requestAnimationFrame(()=>s.classList.add('show'));    
+      },rand(3800,6500));    
+    },{once:true});    
+
+    setTimeout(dropOne,rand(180,360));    
+  }    
+
+  setTimeout(dropOne,700);    
+}    
+
+function tick(){    
+  let diff=Date.now()-START.getTime();    
+  if(diff<0) diff=0;    
+
+  const d=Math.floor(diff/86400000);    
+  const h=Math.floor(diff%86400000/3600000);    
+  const m=Math.floor(diff%3600000/60000);    
+  const s=Math.floor(diff%60000/1000);    
+
+  document.getElementById('d').textContent=d;    
+  document.getElementById('h').textContent=String(h).padStart(2,'0');    
+  document.getElementById('m').textContent=String(m).padStart(2,'0');    
+  document.getElementById('s').textContent=String(s).padStart(2,'0');    
+}    
+
+setInterval(tick,1000);    
+tick();    
+
+/* ===== CONTROL DE ENTRADA COMPATIBLE CON CELULAR Y PC ===== */
+
+function enterPage(e){    
+  if(e) e.preventDefault();    
+  runSequence();    
+}    
+
+intro.addEventListener('click',enterPage);    
+intro.addEventListener('pointerup',enterPage,{passive:false});    
+intro.addEventListener('touchend',enterPage,{passive:false});    
+
+</script>     
+</body>     
+</html>
